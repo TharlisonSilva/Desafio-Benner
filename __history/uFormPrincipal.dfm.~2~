@@ -1,10 +1,9 @@
 object FrmPrincipal: TFrmPrincipal
   Left = 499
   Top = 255
-  BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Caixa de Saque'
-  ClientHeight = 419
-  ClientWidth = 564
+  ClientHeight = 406
+  ClientWidth = 556
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,7 +12,6 @@ object FrmPrincipal: TFrmPrincipal
   Font.Style = []
   KeyPreview = True
   OldCreateOrder = False
-  Position = poDesktopCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
@@ -22,7 +20,7 @@ object FrmPrincipal: TFrmPrincipal
   object ImgLogo: TImage
     Left = 0
     Top = 0
-    Width = 564
+    Width = 556
     Height = 79
     Align = alTop
     AutoSize = True
@@ -363,17 +361,16 @@ object FrmPrincipal: TFrmPrincipal
       87DF19F53B392CEFC6AB776B2637C33EB31C88D8208CA997070403F85007A3FE
       CE3FF24F350FFB0AC9FF00A2A2A2B63E0A785B59F08F836F2C35CB3FB25D49A8
       3CCA9E6A499431C601CA123AA9FCA8A00FFFD9}
+    ExplicitWidth = 564
   end
   object PnlCentro: TPanel
     Left = 0
     Top = 79
-    Width = 564
-    Height = 340
+    Width = 556
+    Height = 327
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 556
-    ExplicitHeight = 327
   end
   object CdsAgencias: TClientDataSet
     Aggregates = <>

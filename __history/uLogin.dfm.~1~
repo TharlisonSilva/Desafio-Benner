@@ -91,7 +91,6 @@ object FrmLogin: TFrmLogin
     Font.Height = -24
     Font.Name = 'Tahoma'
     Font.Style = []
-    NumbersOnly = True
     ParentFont = False
     TabOrder = 1
     OnExit = EdtContaCorrenteExit

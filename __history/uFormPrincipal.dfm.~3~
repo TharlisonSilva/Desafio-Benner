@@ -1,7 +1,6 @@
 object FrmPrincipal: TFrmPrincipal
   Left = 499
   Top = 255
-  BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Caixa de Saque'
   ClientHeight = 419
   ClientWidth = 564
@@ -13,7 +12,6 @@ object FrmPrincipal: TFrmPrincipal
   Font.Style = []
   KeyPreview = True
   OldCreateOrder = False
-  Position = poDesktopCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
