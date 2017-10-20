@@ -1,0 +1,57 @@
+unit uManutencao;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
+  Dialogs, Grids, DBGrids, StdCtrls, ComCtrls, ExtCtrls, DBCtrls;
+
+type
+  TFrmManutencao = class(TFrame)
+    PageControl1: TPageControl;
+    TSNotas: TTabSheet;
+    TsAgencias: TTabSheet;
+    Label1: TLabel;
+    DbAgencias: TDBGrid;
+    Label2: TLabel;
+    DbContas: TDBGrid;
+    DbNotas: TDBGrid;
+    Label3: TLabel;
+    NavAgencias: TDBNavigator;
+    NavNotas: TDBNavigator;
+    NavContas: TDBNavigator;
+    BtnRetornar: TButton;
+    Button1: TButton;
+    Button2: TButton;
+    procedure BtnRetornarClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+implementation
+
+uses uFormPrincipal;
+
+{$R *.dfm}
+
+procedure TFrmManutencao.BtnRetornarClick(Sender: TObject);
+begin
+  { Ocorreu Retorno }
+  FrmPrincipal.TelaAnterior;
+end;
+
+procedure TFrmManutencao.Button1Click(Sender: TObject);
+begin
+  FrmPrincipal.CdsNotas.IndexName := 'VALORDESC';
+end;
+
+procedure TFrmManutencao.Button2Click(Sender: TObject);
+begin
+  FrmPrincipal.CdsNotas.IndexName := 'VALORASC';
+end;
+
+end.

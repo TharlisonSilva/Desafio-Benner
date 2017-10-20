@@ -1,0 +1,47 @@
+unit uRelatorioSaque;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls;
+
+type
+  TFrmRelatorioSaque = class(TFrame)
+    Memo: TMemo;
+    BtnRetornar: TButton;
+    procedure BtnRetornarClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    procedure ConstruirRelatorio(numNotas1,
+      numNotas2,
+      numNotas5,
+      numNotas10,
+      numNotas20,
+      numNotas50,
+      numNotas100 : Integer);
+  end;
+
+implementation
+
+uses uFormPrincipal;
+
+{$R *.dfm}
+
+procedure TFrmRelatorioSaque.BtnRetornarClick(Sender: TObject);
+begin
+  FrmPrincipal.AlterarTela(1);
+end;
+
+procedure TFrmRelatorioSaque.ConstruirRelatorio(numNotas1, numNotas2,
+  numNotas5, numNotas10, numNotas20, numNotas50, numNotas100: Integer);
+begin
+  if numNotas1 > 0 then
+  begin
+    Memo.Lines.Add(IntToStr(numNotas1)'');
+  end;
+end;
+
+end.

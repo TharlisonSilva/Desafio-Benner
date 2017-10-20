@@ -1,0 +1,187 @@
+unit uLogin;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls;
+
+type
+  TFrmLogin = class(TFrame)
+    Label1: TLabel;
+    EdtAgencia: TEdit;
+    Label2: TLabel;
+    EdtContaCorrente: TEdit;
+    BtnConfirmar: TButton;
+    BtnCancelar: TButton;
+    Label3: TLabel;
+    EdtSenha: TEdit;
+    LblAgencia: TLabel;
+    LblConta: TLabel;
+    procedure BtnConfirmarClick(Sender: TObject);
+    procedure BtnCancelarClick(Sender: TObject);
+    procedure EdtAgenciaExit(Sender: TObject);
+    procedure EdtContaCorrenteExit(Sender: TObject);
+  private
+    FConfirmou: boolean;                         { Identifica se o usuário confirmou ou cancelou o login }
+    FTentativas: integer;                        { Número de tentativas }
+    FAgenciaOk: boolean;                         { Confirma se agencia esta ok }
+    FContaOk: boolean;                           { Confirma se a conta existe }
+
+    FConta, FAgencia, FSenha: string;            { Conta, Agencia e Senha para retornar }
+  public
+    procedure Inicializar;                       { Inicializa o frame }
+
+    function Resultado(var Ag: string; var CC: string;
+        var Senha: string): boolean;             { Retorna o resultado do formulário }
+
+  end;
+
+implementation
+
+uses uFormPrincipal;
+
+{$R *.dfm}
+
+procedure TFrmLogin.Inicializar;
+begin
+  { Inicializa variáveis }
+  FConfirmou := False;
+  FTentativas := 0;
+
+  EdtAgencia.Text := '';
+  EdtContaCorrente.Text := '';
+  EdtSenha.Text := '';
+  LblAgencia.Caption := '';
+  LblConta.Caption := '';
+end;
+
+function TFrmLogin.Resultado(var Ag, CC, Senha: string): boolean;
+begin
+  { Repassa os dados para o formulário que chamou a tela de login }
+  Ag := EdtAgencia.Text;
+  CC := EdtContaCorrente.Text;
+  Senha := EdtSenha.Text;
+  Result := FConfirmou;
+end;
+
+procedure TFrmLogin.BtnConfirmarClick(Sender: TObject);
+begin
+  { Verifica se os campos estão preenchidos }
+  if Trim(EdtAgencia.Text) = '' then
+  begin
+    ShowMessage('Preencha a agência!');
+    EdtAgencia.SetFocus;
+    exit;    
+  end;
+
+  if Trim(EdtContaCorrente.Text) = '' then
+  begin
+    ShowMessage('Preencha a conta corrente!');
+    EdtContaCorrente.SetFocus;
+    exit;
+  end;
+
+  if Trim(EdtSenha.Text) = '' then
+  begin
+    ShowMessage('Preencha a senha!');
+    EdtSenha.SetFocus;
+    exit;
+  end;
+
+  { Verifica se a agência está ok }
+  if not FAgenciaOk then
+  begin
+    EdtAgencia.SetFocus;
+
+    { incrementa em um o numero de tentativas }
+    inc(FTentativas);
+  end
+  else
+  begin
+    { Verifica se a conta está ok }
+    if not FContaOk then
+    begin
+      EdtContaCorrente.SetFocus;
+
+      { incrementa em um o numero de tentativas }
+      inc(FTentativas);
+    end
+    else
+    begin
+      { Verifica se a senha está certa }
+      if FrmPrincipal.CdsContas.FieldByName('SENHA').AsString <> EdtSenha.Text then
+      begin
+        ShowMessage('Senha não confere!');
+        EdtSenha.SetFocus;
+        { incrementa em um o numero de tentativas }
+        inc(FTentativas);
+      end;
+    end;
+  end;
+
+  { Verifica o total de tentativas }
+  if FTentativas > 3 then
+  begin
+    { Nro nao permitido de tentativas }
+    ShowMessage('Você esgotou as tentatívas possíveis!');
+    BtnCancelar.Click;
+    exit;
+  end;
+
+   { GARANTE A PERSISTENCIA DOS DADOS }
+  if (FAgenciaOk) AND (FContaOk) AND (FrmPrincipal.CdsContas.FieldByName('SENHA').AsString = EdtSenha.Text)then
+    begin
+      FConfirmou := True;
+      FConta := EdtContaCorrente.Text;
+      FAgencia := EdtAgencia.Text;
+      FSenha := EdtSenha.Text;
+
+      FrmPrincipal.AlterarTela(4);
+    end;
+end;
+
+procedure TFrmLogin.BtnCancelarClick(Sender: TObject);
+begin
+  { Ocorreu cancelamento }
+  FConfirmou := False;
+  FrmPrincipal.TelaAnterior;
+end;
+
+procedure TFrmLogin.EdtAgenciaExit(Sender: TObject);
+begin
+  if Trim(EdtAgencia.Text) = '' then
+    exit;
+    
+  { Verifica a existencia da agencia }
+  if FrmPrincipal.CdsAgencias.Locate('CODIGO', EdtAgencia.Text, []) then
+    begin
+      LblAgencia.Caption := FrmPrincipal.CdsAgencias.FieldByName('NOME').AsString;
+      FAgenciaOk := True;
+    end
+  else
+    begin
+      LblAgencia.Caption := 'Agencia inexistente!';
+      FAgenciaOk := False;
+    end;
+end;
+
+procedure TFrmLogin.EdtContaCorrenteExit(Sender: TObject);
+begin
+  if Trim(EdtContaCorrente.Text) = '' then
+    exit;
+
+  { Verifica a existencia da conta }
+  if FrmPrincipal.CdsContas.Locate('AGENCIA;CONTACORRENTE', VarArrayOf([EdtAgencia.Text, EdtContaCorrente.Text]), []) then
+  begin
+    LblConta.Caption := '';
+    FContaOK := True;
+  end
+  else
+  begin
+    LblConta.Caption := 'Conta não existente!';
+    FContaOk := False;
+  end;
+end;
+
+end.

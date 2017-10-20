@@ -1,0 +1,223 @@
+unit uSaque;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ExtCtrls, uRelatorioSaque;
+
+type
+  TFrmSaque = class(TFrame)
+    Label1: TLabel;
+    BtnConfirmar: TButton;
+    BtnCancelar: TButton;
+    BtnUm: TButton;
+    Btn2: TButton;
+    Btn3: TButton;
+    Btn4: TButton;
+    Btn5: TButton;
+    Btn6: TButton;
+    Btn7: TButton;
+    Btn8: TButton;
+    Btn9: TButton;
+    Btn0: TButton;
+    BtnClear: TButton;
+    PnlValor: TPanel;
+    BtnBackspace: TButton;
+    procedure BtnUmClick(Sender: TObject);
+    procedure Btn2Click(Sender: TObject);
+    procedure Btn3Click(Sender: TObject);
+    procedure Btn4Click(Sender: TObject);
+    procedure Btn5Click(Sender: TObject);
+    procedure Btn6Click(Sender: TObject);
+    procedure Btn7Click(Sender: TObject);
+    procedure Btn8Click(Sender: TObject);
+    procedure Btn9Click(Sender: TObject);
+    procedure Btn0Click(Sender: TObject);
+    procedure BtnClearClick(Sender: TObject);
+    procedure BtnBackspaceClick(Sender: TObject);
+    procedure BtnConfirmarClick(Sender: TObject);
+    procedure BtnCancelarClick(Sender: TObject);
+  private
+    { Private declarations }
+    numNotas1 : Integer;
+    numNotas2 : Integer;
+    numNotas5 : Integer;
+    numNotas10 : Integer;
+    numNotas20 : Integer;
+    numNotas50 : Integer;
+    numNotas100 : Integer;
+
+    function extrairValorProximoAlto(numero : Integer) : Integer;
+  public
+    procedure Tecla(Valor: integer);             { Processa a tecla pressionada }
+    procedure AdicionarNotaPorValor(valor : Integer);
+  end;
+
+implementation
+
+uses uFormPrincipal;
+
+{$R *.dfm}
+
+procedure TFrmSaque.BtnUmClick(Sender: TObject);
+begin
+  Tecla(1);
+end;
+
+procedure TFrmSaque.Tecla(Valor: integer);
+begin
+  if PnlValor.Caption = '0' then
+    PnlValor.Caption := IntToStr(Valor)
+  else
+    PnlValor.Caption := PnlValor.Caption + IntToStr(Valor); 
+end;
+
+procedure TFrmSaque.Btn2Click(Sender: TObject);
+begin
+  Tecla(2);
+end;
+
+procedure TFrmSaque.Btn3Click(Sender: TObject);
+begin
+  Tecla(3);
+end;
+
+procedure TFrmSaque.Btn4Click(Sender: TObject);
+begin
+  Tecla(4);
+end;
+
+procedure TFrmSaque.Btn5Click(Sender: TObject);
+begin
+  Tecla(5);
+end;
+
+procedure TFrmSaque.Btn6Click(Sender: TObject);
+begin
+  Tecla(6);
+end;
+
+procedure TFrmSaque.Btn7Click(Sender: TObject);
+begin
+  Tecla(7);
+end;
+
+procedure TFrmSaque.Btn8Click(Sender: TObject);
+begin
+  Tecla(8);
+end;
+
+procedure TFrmSaque.Btn9Click(Sender: TObject);
+begin
+  Tecla(9);
+end;
+
+procedure TFrmSaque.Btn0Click(Sender: TObject);
+begin
+  Tecla(0);
+end;
+
+procedure TFrmSaque.BtnClearClick(Sender: TObject);
+begin
+  PnlValor.Caption := '0';
+end;
+
+procedure TFrmSaque.BtnBackspaceClick(Sender: TObject);
+begin
+  if Length(PnlValor.Caption) <= 1 then
+    PnlValor.Caption := '0'
+  else
+    PnlValor.Caption := copy(PnlValor.Caption, 1, Length(PnlValor.Caption)-1);
+end;
+
+procedure TFrmSaque.BtnConfirmarClick(Sender: TObject);
+var
+  Notas : TStrings;
+  cedulaAtual : String;
+  valorAtual : Currency;
+  notaAtual : Integer;
+  somaTotalNotas : Integer;
+  faltando : Integer;
+  Quantidade : Integer;
+begin
+  { Se o valor for menor ou igual a zero, mostrar uma mensagem }
+  if StrToInt(PnlValor.Caption) <= 0 then
+  begin
+    ShowMessage('O valor não pode ser menor ou igual a zero.');
+    PnlValor.SetFocus;
+    Exit;
+  end;
+
+  numNotas1 := 0;
+  numNotas2 := 0;
+  numNotas5 := 0;
+  numNotas10 := 0;
+  numNotas20 := 0;
+  numNotas50 := 0;
+  numNotas100 := 0;
+
+  { Verificar na tabela de notas e utilizá-las para o saque }
+  cedulaAtual := FrmPrincipal.CdsNotas.FieldByName('CEDULA').AsString;
+  valorAtual := FrmPrincipal.CdsNotas.FieldByName('Valor').AsCurrency;
+
+  notaAtual := Trunc(valorAtual);
+  faltando := StrToInt(PnlValor.Caption);
+  while somaTotalNotas < StrToInt(PnlValor.Caption) do
+  begin
+    notaAtual := extrairValorProximoAlto(faltando);
+
+    somaTotalNotas := somaTotalNotas + notaAtual;
+    
+    faltando := StrToInt(PnlValor.Caption) - somaTotalNotas;
+  end;
+
+  { Avançar para a tela de relatório de saque }
+  frmPrincipal.FrmRelatorioSaque.ConstruirRelatorio(numNotas1,
+    numNotas2, numNotas5, numNotas10, numNotas20, numNotas50,
+    numNotas100);
+  frmPrincipal.AlterarTela(5);
+end;
+
+procedure TFrmSaque.BtnCancelarClick(Sender: TObject);
+begin
+  { Retornar ao menu principal }
+  FrmPrincipal.AlterarTela(1);
+end;
+
+function TFrmSaque.extrairValorProximoAlto(numero: Integer) : Integer;
+begin
+  if numero > 100 then
+    Result := 100
+  else if numero > 50 then
+    Result := 50
+  else if numero > 20 then
+    Result := 20
+  else if numero > 10 then
+    Result := 10
+  else if numero > 5 then
+    Result := 5
+  else if numero > 2 then
+    Result := 2
+  else if numero > 1 then
+    Result := 1
+  else
+    Result := 0;
+end;
+
+procedure TFrmSaque.AdicionarNotaPorValor(valor: Integer);
+begin
+  case valor of
+    1 : Inc(numNotas1);
+    2 : Inc(numNotas2);
+    5 : Inc(numNotas5);
+    10 : Inc(numNotas10);
+    20 : Inc(numNotas20);
+    50 : Inc(numNotas50);
+    100 : Inc(numNotas100);
+  else
+    ShowMessage('Erro ao adicionar nota.');
+  End;
+end;
+
+end.
