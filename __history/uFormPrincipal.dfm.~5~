@@ -372,6 +372,8 @@ object FrmPrincipal: TFrmPrincipal
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitWidth = 556
+    ExplicitHeight = 327
   end
   object CdsAgencias: TClientDataSet
     Aggregates = <>
@@ -452,7 +454,6 @@ object FrmPrincipal: TFrmPrincipal
         Fields = 'VALOR'
         Options = [ixDescending]
       end>
-    IndexName = 'VALORDESC'
     Params = <>
     StoreDefs = True
     Left = 353

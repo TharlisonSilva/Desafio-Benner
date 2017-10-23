@@ -24,6 +24,5 @@ object FrmRelatorioSaque: TFrmRelatorioSaque
     Font.Style = []
     ParentFont = False
     TabOrder = 1
-    OnClick = BtnRetornarClick
   end
 end

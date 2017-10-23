@@ -40,17 +40,18 @@ type
     procedure BtnCancelarClick(Sender: TObject);
     procedure BtnConfirmarClick(Sender: TObject);
   private
-    var  //ARRAYS PARA ORDENA플O E CALCULO DAS CEDULAS INTERNO.
+    var  {ARRAYS PARA ORDENA플O E CALCULO DAS CEDULAS INTERNO}
       Cedulas: Array of Integer;
       Quantidade: Array of Integer;
 
     procedure Saque(Quantia: Integer);
+    function saldo():Integer;
 
   public
     procedure Tecla(Valor: integer);{ Processa a tecla pressionada }
-    procedure OrdenaArrays(Cedulas: Array of Integer; Quantidade: Array of Integer); //ORDENA OS ARRAYS PARA CALCULO INTERNO.
-    procedure AlimentaArrays;//ALIMENTA플O DOS ARRAYS COM DADOS DO BANCO, PARA PROCESSAMENTO INTERNO.
-    function saldo():Integer;//CONSULTA DE SALDO ATUAL NO TERMINAL.
+    procedure OrdenaArrays(Cedulas: Array of Integer; Quantidade: Array of Integer); {ORDENA OS ARRAYS PARA CALCULO INTERNO}
+    procedure AlimentaArrays;{ALIMENTA플O DOS ARRAYS COM DADOS DO BANCO, PARA PROCESSAMENTO INTERNO}
+
   end;
 
 implementation
@@ -70,8 +71,7 @@ var
   Trocou:Boolean;
 begin
   Trocou := True;
-
-  //ORDENA플O EM ORDEM CRESCENTE NO FORMATO BOLHA.
+  { ORDENA플O EM ORDEM CRESCENTE NO FORMATO BOLHA }
   while(Trocou <> False)do
     begin
       Trocou := False;
@@ -79,13 +79,12 @@ begin
         begin
           if (cedulas[Indice] < cedulas[Indice +1]) then
             begin
-
-              //ORDENA CEDULAS.
+              { ORDENA CEDULAS }
               auxiliar := cedulas[Indice];
               cedulas[Indice]:= cedulas[Indice +1];
               cedulas[Indice +1] := auxiliar;
 
-              //ORDENA QUANTIDADE PARALELO AS CEDULAS.
+              { ORDENA QUANTIDADE PARALELO AS CEDULAS }
               auxiliar := Quantidade[Indice];
               Quantidade[Indice]:= Quantidade[Indice +1];
               Quantidade[Indice +1] := auxiliar;
@@ -105,8 +104,8 @@ begin
 
   for indice := Low(cedulas) to High(cedulas) do
       Inc(QuantiaTerminal, (Quantidade[indice] * cedulas[indice]));
-
   Result := QuantiaTerminal;
+
 end;
 
 procedure TFrmSaque.Saque(Quantia: Integer);
@@ -180,7 +179,7 @@ begin
   Tecla(9);
 end;
 
-//ALIMENTA플O DOS ARRAYS COM DADOS DO BANCO, PARA PROCESSAMENTO INTERNO.
+{ ALIMENTA플O DOS ARRAYS COM DADOS DO BANCO, PARA PROCESSAMENTO INTERNO }
 procedure TFrmSaque.AlimentaArrays;
 var
   indice, contador:  integer;
@@ -190,7 +189,7 @@ begin
    setLength(cedulas, 0);
    setLength(quantidade, 0);
 
- //BUSCA DAS CEDULAS PARA ORDENAMENTO EM ARRAY.
+ { BUSCA DAS CEDULAS PARA ORDENAMENTO EM ARRAY }
     while (FrmPrincipal.cdsNotas.Active) and (indice <> 2) do
       begin
         if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = 1)  OR

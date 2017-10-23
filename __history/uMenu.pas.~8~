@@ -18,10 +18,8 @@ type
     BtnManutencao: TButton;
     procedure BtnSaquesClick(Sender: TObject);
     procedure BtnManutencaoClick(Sender: TObject);
-    procedure BtnExtratosClick(Sender: TObject);
   private
     { Private declarations }
-    procedure ChecaTerminal;
   public
     { Public declarations }
   end;
@@ -34,24 +32,7 @@ uses uFormPrincipal;
 
 procedure TFrmMenu.BtnSaquesClick(Sender: TObject);
 begin
-  ChecaTerminal;
-end;
-
-procedure TFrmMenu.ChecaTerminal;
-begin
-  //FAZ A CHECAGEM SE EXISTE ALGUM SALDO NO TERMINAL
-  FrmPrincipal.FrmSaque.AlimentaArrays;
-  if FrmPrincipal.FrmSaque.saldo = 0 then
-    begin
-      ShowMessage(' Terminal em manutenção !')
-    end
-    else
-      FrmPrincipal.AlterarTela(2);{ Seleciona a tela de Login }
-end;
-
-procedure TFrmMenu.BtnExtratosClick(Sender: TObject);
-begin
-    FrmPrincipal.AlterarTela(5);
+    FrmPrincipal.AlterarTela(2);{ Seleciona a tela de Login }
 end;
 
 procedure TFrmMenu.BtnManutencaoClick(Sender: TObject);

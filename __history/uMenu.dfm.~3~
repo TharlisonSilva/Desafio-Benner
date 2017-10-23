@@ -40,6 +40,7 @@ object FrmMenu: TFrmMenu
     Width = 121
     Height = 45
     Caption = 'Extratos'
+    Enabled = False
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -19
@@ -47,7 +48,6 @@ object FrmMenu: TFrmMenu
     Font.Style = []
     ParentFont = False
     TabOrder = 2
-    OnClick = BtnExtratosClick
   end
   object Button3: TButton
     Left = 12

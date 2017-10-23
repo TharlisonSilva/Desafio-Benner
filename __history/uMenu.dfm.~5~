@@ -47,7 +47,6 @@ object FrmMenu: TFrmMenu
     Font.Style = []
     ParentFont = False
     TabOrder = 2
-    OnClick = BtnExtratosClick
   end
   object Button3: TButton
     Left = 12

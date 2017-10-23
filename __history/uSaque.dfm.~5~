@@ -30,7 +30,6 @@ object FrmSaque: TFrmSaque
     Font.Style = []
     ParentFont = False
     TabOrder = 13
-    OnClick = BtnConfirmarClick
   end
   object BtnCancelar: TButton
     Left = 256

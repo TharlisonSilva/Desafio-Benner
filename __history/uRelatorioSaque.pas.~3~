@@ -10,7 +10,6 @@ type
   TFrmRelatorioSaque = class(TFrame)
     Memo: TMemo;
     BtnRetornar: TButton;
-    procedure BtnRetornarClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -22,10 +21,5 @@ implementation
 uses uFormPrincipal;
 
 {$R *.dfm}
-
-procedure TFrmRelatorioSaque.BtnRetornarClick(Sender: TObject);
-begin
-    FrmPrincipal.TelaAnterior;
-end;
 
 end.

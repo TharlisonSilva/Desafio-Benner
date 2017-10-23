@@ -38,13 +38,27 @@ begin
 end;
 
 procedure TFrmMenu.ChecaTerminal;
+var
+  Indice, Quantidade:  integer;
 begin
-  //FAZ A CHECAGEM SE EXISTE ALGUM SALDO NO TERMINAL
-  FrmPrincipal.FrmSaque.AlimentaArrays;
-  if FrmPrincipal.FrmSaque.saldo = 0 then
+  indice   := 0;
+  Quantidade := 0;
+
+  {VERIFICAÇÃO SE HÁ CEDULAS PARA SAQUE}
+  while (FrmPrincipal.cdsNotas.Active) and (indice <> 2) do
     begin
-      ShowMessage(' Terminal em manutenção !')
-    end
+      if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = 1)  OR
+         (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = 100)then
+            Inc(indice);
+
+      if FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger > 0 then
+          Inc(Quantidade);
+
+      FrmPrincipal.cdsNotas.FindNext;
+    end;
+    FrmPrincipal.cdsNotas.FindFirst;
+    if Quantidade = 0 then
+      ShowMessage(' Terminal em Manutenção !')
     else
       FrmPrincipal.AlterarTela(2);{ Seleciona a tela de Login }
 end;

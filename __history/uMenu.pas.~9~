@@ -18,7 +18,6 @@ type
     BtnManutencao: TButton;
     procedure BtnSaquesClick(Sender: TObject);
     procedure BtnManutencaoClick(Sender: TObject);
-    procedure BtnExtratosClick(Sender: TObject);
   private
     { Private declarations }
     procedure ChecaTerminal;
@@ -34,24 +33,31 @@ uses uFormPrincipal;
 
 procedure TFrmMenu.BtnSaquesClick(Sender: TObject);
 begin
-  ChecaTerminal;
+
+    FrmPrincipal.AlterarTela(2);{ Seleciona a tela de Login }
 end;
 
 procedure TFrmMenu.ChecaTerminal;
+var
+  Indice, Quantidade:  integer;
 begin
-  //FAZ A CHECAGEM SE EXISTE ALGUM SALDO NO TERMINAL
-  FrmPrincipal.FrmSaque.AlimentaArrays;
-  if FrmPrincipal.FrmSaque.saldo = 0 then
-    begin
-      ShowMessage(' Terminal em manutenção !')
-    end
-    else
-      FrmPrincipal.AlterarTela(2);{ Seleciona a tela de Login }
-end;
+   indice   := 0;
+   Quantidade := 0;
 
-procedure TFrmMenu.BtnExtratosClick(Sender: TObject);
-begin
-    FrmPrincipal.AlterarTela(5);
+ { BUSCA DAS CEDULAS PARA ORDENAMENTO EM ARRAY }
+    while (FrmPrincipal.cdsNotas.Active) and (indice <> 2) do
+      begin
+        if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = 1)  OR
+           (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = 100)then
+              Inc(indice);
+
+        if FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger > 0 then
+          begin
+            Quantidade:= FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger;
+          end;
+        FrmPrincipal.cdsNotas.FindNext;
+      end;
+    FrmPrincipal.cdsNotas.FindFirst;
 end;
 
 procedure TFrmMenu.BtnManutencaoClick(Sender: TObject);
