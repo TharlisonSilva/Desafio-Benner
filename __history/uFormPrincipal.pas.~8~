@@ -1,0 +1,179 @@
+unit uFormPrincipal;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ExtCtrls, jpeg, uLogin, uMenu, uManutencao, DB,
+  DBClient, uSaque, uRelatorioSaque;
+
+type
+  TFrmPrincipal = class(TForm)
+    ImgLogo: TImage;
+    PnlCentro: TPanel;
+    CdsAgencias: TClientDataSet;
+    CdsContas: TClientDataSet;
+    CdsNotas: TClientDataSet;
+    DsAgencias: TDataSource;
+    DsContas: TDataSource;
+    DsNotas: TDataSource;
+    CdsExtrato: TClientDataSet;
+    CdsExtratoValor: TIntegerField;
+    CdsExtratodata: TStringField;
+    DsExtrato: TDataSource;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+  private
+    FTela: integer;                              { Número da tela atual }
+    FTelaAnterior: integer;                      { Tela anterior }
+    FFrameAtual: TFrame;                         { Frame atual }
+
+    procedure SelecionarTela;                    { Ajusta formulário principal de acordo com a tela selecionada }
+  public
+    FrmMenu: TFrmMenu;                           { Frame de menu principal }
+    FrmLogin: TFrmLogin;                         { Frame de Login de Agencia, CC e Senha }
+    FrmManutencao: TFrmManutencao;               { Frame de Manutençao }
+    FrmSaque: TFrmSaque;                         { Frame de Saque }
+    FrmRelatorioSaque: TFrmRelatorioSaque;       { Frame de Relatorio de Saque }
+
+    procedure AlterarTela(NovaTela: integer);    { Seleção de uma nova tela }
+    procedure TelaAnterior;                      { Seleciona a tela anterior }
+  end;
+
+var
+  FrmPrincipal: TFrmPrincipal;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmPrincipal.AlterarTela(NovaTela: integer);
+begin
+  { Seleciona a nova tela }
+  FTelaAnterior := FTela;
+  FTela := NovaTela;
+  SelecionarTela;
+end;
+
+procedure TFrmPrincipal.FormCreate(Sender: TObject);
+begin
+  { Inicializa variáveis }
+  FTela := 1;
+  FFrameAtual := nil;
+
+  { Cria os frames }
+  FrmLogin := TFrmLogin.Create(Self);
+  FrmMenu := TFrmMenu.Create(Self);
+  FrmManutencao := TFrmManutencao.Create(Self);
+  FrmSaque := TFrmSaque.Create(Self);
+  FrmRelatorioSaque := TFrmRelatorioSaque.Create(Self);                        
+
+  FrmManutencao.DbAgencias.DataSource := DsAgencias;
+  FrmManutencao.DbContas.DataSource := DsContas;
+  FrmManutencao.DbNotas.DataSource := DsNotas;
+
+  FrmManutencao.NavAgencias.DataSource := DsAgencias;
+  FrmManutencao.NavContas.DataSource := DsContas;
+  FrmManutencao.NavNotas.DataSource := DsNotas;
+
+  { Seleciona a tela atual }
+  SelecionarTela;
+
+  { Cria os datasets }
+  CdsAgencias.FileName := GetCurrentDir + '\Agencias.cds';
+  CdsAgencias.CreateDataset;
+  CdsContas.FileName := GetCurrentDir + '\Contas.cds';
+  CdsContas.CreateDataset;
+  CdsNotas.FileName := GetCurrentDir + '\Notas.cds';
+  CdsNotas.CreateDataset;
+
+  { Verifica a existencia dos arquivos de dados e faz a leitura }
+  if FileExists(GetCurrentDir + '\Agencias.dat') then
+    CdsAgencias.LoadFromFile(GetCurrentDir + '\Agencias.dat');
+  if FileExists(GetCurrentDir + '\Contas.dat') then
+    CdsContas.LoadFromFile(GetCurrentDir + '\Contas.dat');
+  if FileExists(GetCurrentDir + '\Notas.dat') then
+    cdsNotas.LoadFromFile(GetCurrentDir + '\Notas.dat');
+
+  { Desliga o log de alterações para não aumentar o tamenho dos arquivos }
+  CdsAgencias.LogChanges := False;
+  CdsContas.LogChanges := False;
+  cdsNotas.LogChanges := False;
+end;
+
+procedure TFrmPrincipal.SelecionarTela;
+begin
+  { Sempre que inicializa, deve pegar o frame anterior (se ele existir um anterior) }
+  { e coloca como inivisivel para não ter problemas de sobreposição. }
+  if FFrameAtual <> nil then
+  begin
+    FFrameAtual.Visible := False;
+    FFrameAtual.Parent := nil;
+  end;
+
+  { Verifica a tela selecionada } 
+  Case FTela of
+       1: begin { 1 = Menu inicial }
+          FFrameAtual := FrmMenu;
+          end;
+
+       2: begin { 2 = Login }
+          FFrameAtual := FrmLogin;
+          FrmLogin.Inicializar;
+          end;
+
+       3: begin { 3 = Manutencao }
+          FFrameAtual := FrmManutencao;
+          end;
+
+       4: begin { 4 = Saques }
+          FFrameAtual := FrmSaque;
+          end;
+
+       5: begin { 5 = Relatorio Saques }
+          FFrameAtual := FrmRelatorioSaque;
+          end;
+       else
+  end;
+
+  { Ajusta o Frame atual na tela e faz o show dele }
+  if FFrameAtual <> nil then
+  begin
+    FFrameAtual.Parent := PnlCentro;
+    FFrameAtual.Show;
+  end;
+end;
+
+procedure TFrmPrincipal.TelaAnterior;
+begin
+  { Verifica se a tela anterior é válida }
+  if FTelaAnterior = 0 then
+    exit;
+
+  { Seleciona a nova tela }
+  AlterarTela(FTelaAnterior);
+  SelecionarTela;
+end;
+
+procedure TFrmPrincipal.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  { Verifica a existencia dos arquivos de dados e faz a leitura }
+  CdsAgencias.SaveToFile(GetCurrentDir + '\Agencias.dat');
+  CdsContas.SaveToFile(GetCurrentDir + '\Contas.dat');
+  cdsNotas.SaveToFile(GetCurrentDir + '\Notas.dat');
+end;
+
+procedure TFrmPrincipal.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if FTela <> 4 then
+    Exit;
+
+  if StrToIntDef(Key, -1) > -1 then
+    FrmSaque.Tecla(StrToInt(Key));
+
+//  if Key = Char(VK_BACK) ;
+end;
+
+end.

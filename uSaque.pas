@@ -4,8 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, uRelatorioSaque
-, uMensagem;
+  Dialogs, StdCtrls, ExtCtrls, uRelatorioSaque, Generics.Collections;
 
 type
   TFrmSaque = class(TFrame)
@@ -40,10 +39,10 @@ type
     procedure BtnCancelarClick(Sender: TObject);
     procedure BtnConfirmarClick(Sender: TObject);
   private
-    var  //ARRAYS PARA ORDENAÇÃO E CALCULO DAS CEDULAS INTERNO.
-      Cedulas: Array of Integer;
+    var  //PARA ORDENAÇÃO E CALCULO DAS CEDULAS INTERNO.
+      Cedula: Array of Integer;
       Quantidade: Array of Integer;
-
+      DadosTransação : TDictionary<Integer, Integer>;
     procedure Saque(Quantia: Integer);
 
   public
@@ -103,33 +102,52 @@ begin
   Indice          := 0;
   QuantiaTerminal := 0;
 
-  for indice := Low(cedulas) to High(cedulas) do
-      Inc(QuantiaTerminal, (Quantidade[indice] * cedulas[indice]));
+  for Indice := Low(cedula) to High(cedula) do
+      Inc(QuantiaTerminal, (Quantidade[Indice] * cedula[Indice]));
 
   Result := QuantiaTerminal;
 end;
 
 procedure TFrmSaque.Saque(Quantia: Integer);
 var
-  i: integer;
+  QuantiaAtual, Indice, DTcedula: integer;
 begin
-   if Quantia = 0 then
+  DadosTransação          := TDictionary<Integer, Integer>.create();
+  Indice                  := 0;
+  QuantiaAtual            := 0;
+
+  if Quantia = 0 then
     begin
       ShowMessage(' Quantia Invalida para saque !');
+      PnlValor.Caption := '0';
       FrmPrincipal.AlterarTela(1);
     end
-   else
+  else
     begin
       AlimentaArrays;
-      if length(cedulas) <> 0 then
-        OrdenaArrays(Cedulas,Quantidade)
-      else
-        ShowMessage('Terminal sem Notas para Saque !');
+      if length(cedula) <> 0 then
+        begin
+          OrdenaArrays(cedula,Quantidade);
+          if Saldo() < Quantia then
+            ShowMessage(' Quantia Não permitida !')
+          else
+            begin
+              for Indice := Low(Cedula) to High(Cedula) do
+                begin
+                  if Trunc(Quantia / cedula[Indice]) <> 0 then
+                    begin
+                      DadosTransação.Add(cedula[Indice], Trunc(Quantia / cedula[Indice]));
+                      QuantiaAtual := (QuantiaAtual + (cedula[Indice] * Trunc(Quantia / cedula[Indice])));
+                      Quantia  := Quantia mod cedula[Indice];
+                    end;
+                end;
+              if QuantiaAtual <> StrToInt(PnlValor.Caption) then
+                ShowMessage(' Quantia não permitido ! ')
+              else
+                ShowMessage('Saque Realizado com sucesso !');
+            end;
+        end;
     end;
-
-    for i := Low(cedulas) to High(cedulas) do
-      showMessage(IntToStr(cedulas[i]) + '  ' + IntToStr(quantidade[i]));
-
 end;
 
 procedure TFrmSaque.Tecla(Valor: integer);
@@ -187,10 +205,10 @@ var
 begin
    indice   := 0;
    contador := 0;
-   setLength(cedulas, 0);
+   setLength(cedula, 0);
    setLength(quantidade, 0);
 
- //BUSCA DAS CEDULAS PARA ORDENAMENTO EM ARRAY.
+ //BUSCA DAS cedula PARA ORDENAMENTO EM ARRAY.
     while (FrmPrincipal.cdsNotas.Active) and (indice <> 2) do
       begin
         if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = 1)  OR
@@ -199,9 +217,9 @@ begin
 
         if FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger > 0 then
           begin
-            setLength(cedulas, length(Cedulas)+1);
+            setLength(cedula, length(cedula)+1);
             setLength(Quantidade, length(quantidade)+1);
-            Cedulas[contador]:= FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger;
+            cedula[contador]:= FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger;
             Quantidade[contador]:= FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger;
             Inc(contador);
           end;
@@ -227,7 +245,7 @@ end;
 
 procedure TFrmSaque.BtnConfirmarClick(Sender: TObject);
 begin
-Saque(1);
+Saque(StrToIntDef(PnlValor.Caption, 0));
 end;
 
 procedure TFrmSaque.BtnBackspaceClick(Sender: TObject);
