@@ -9,7 +9,7 @@ object FrmManutencao: TFrmManutencao
     Top = 0
     Width = 564
     Height = 339
-    ActivePage = TSNotas
+    ActivePage = TsAgencias
     Align = alClient
     TabOrder = 0
     object TSNotas: TTabSheet

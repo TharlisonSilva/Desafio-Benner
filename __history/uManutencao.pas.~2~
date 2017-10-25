@@ -53,4 +53,5 @@ procedure TFrmManutencao.Button2Click(Sender: TObject);
 begin
   FrmPrincipal.CdsNotas.IndexName := 'VALORASC';
 end;
+
 end.

@@ -76,6 +76,21 @@ object FrmManutencao: TFrmManutencao
         TabOrder = 4
         OnClick = Button2Click
       end
+      object Button3: TButton
+        Left = 224
+        Top = 254
+        Width = 190
+        Height = 45
+        Caption = 'Atualizar Cedulas'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -19
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 5
+        OnClick = BtnRetornarClick
+      end
     end
     object TsAgencias: TTabSheet
       Caption = 'Agencias e contas'

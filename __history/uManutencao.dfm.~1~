@@ -31,7 +31,7 @@ object FrmManutencao: TFrmManutencao
         TitleFont.Charset = DEFAULT_CHARSET
         TitleFont.Color = clWindowText
         TitleFont.Height = -11
-        TitleFont.Name = 'Tahoma'
+        TitleFont.Name = 'MS Sans Serif'
         TitleFont.Style = []
       end
       object NavNotas: TDBNavigator
@@ -83,7 +83,7 @@ object FrmManutencao: TFrmManutencao
       object Label1: TLabel
         Left = 4
         Top = 48
-        Width = 43
+        Width = 44
         Height = 13
         Caption = 'Agencias'
         FocusControl = DbAgencias
@@ -91,7 +91,7 @@ object FrmManutencao: TFrmManutencao
       object Label2: TLabel
         Left = 4
         Top = 176
-        Width = 38
+        Width = 36
         Height = 13
         Caption = 'Contas:'
         FocusControl = DbContas
@@ -105,7 +105,7 @@ object FrmManutencao: TFrmManutencao
         TitleFont.Charset = DEFAULT_CHARSET
         TitleFont.Color = clWindowText
         TitleFont.Height = -11
-        TitleFont.Name = 'Tahoma'
+        TitleFont.Name = 'MS Sans Serif'
         TitleFont.Style = []
       end
       object DbContas: TDBGrid
@@ -117,7 +117,7 @@ object FrmManutencao: TFrmManutencao
         TitleFont.Charset = DEFAULT_CHARSET
         TitleFont.Color = clWindowText
         TitleFont.Height = -11
-        TitleFont.Name = 'Tahoma'
+        TitleFont.Name = 'MS Sans Serif'
         TitleFont.Style = []
       end
       object NavAgencias: TDBNavigator

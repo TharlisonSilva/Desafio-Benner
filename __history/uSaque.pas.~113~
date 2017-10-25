@@ -38,11 +38,13 @@ type
     procedure BtnBackspaceClick(Sender: TObject);
     procedure BtnCancelarClick(Sender: TObject);
     procedure BtnConfirmarClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     var  //PARA ORDENAÇÃO E CALCULO DAS CEDULAS INTERNO.
       Cedula: Array of Integer;
       Quantidade: Array of Integer;
       DadosTransação : TDictionary<Integer, Integer>;
+      ResumoTransação: String;
     procedure Saque(Quantia: Integer);
 
   public
@@ -50,6 +52,8 @@ type
     procedure OrdenaArrays(Cedulas: Array of Integer; Quantidade: Array of Integer); //ORDENA OS ARRAYS PARA CALCULO INTERNO.
     procedure AlimentaArrays;//ALIMENTAÇÃO DOS ARRAYS COM DADOS DO BANCO, PARA PROCESSAMENTO INTERNO.
     function saldo():Integer;//CONSULTA DE SALDO ATUAL NO TERMINAL.
+    function RelatorioTransação():String;
+    function ContagemCedulas(Quantia: Integer):Integer;
   end;
 
 implementation
@@ -61,6 +65,30 @@ uses uFormPrincipal;
 procedure TFrmSaque.BtnUmClick(Sender: TObject);
 begin
   Tecla(1);
+end;
+
+function TFrmSaque.ContagemCedulas(Quantia: Integer):Integer;
+var
+  QuantiaAtual, Indice: Integer;
+begin
+  QuantiaAtual := 0;
+  Indice       := 0;
+
+  for Indice := Low(Cedula) to High(Cedula) do
+    begin
+      if Trunc(Quantia / cedula[Indice]) <> 0 then
+        begin
+          DadosTransação.Add(cedula[Indice], Trunc(Quantia / cedula[Indice]));
+          QuantiaAtual := (QuantiaAtual + (cedula[Indice] * Trunc(Quantia / cedula[Indice])));
+          Quantia  := Quantia mod cedula[Indice];
+        end;
+    end;
+  result := QuantiaAtual;
+end;
+
+procedure TFrmSaque.FormCreate(Sender: TObject);
+begin
+  ResumoTransação := #13#10+ 'Data de Saque: '+  #13#10 +DateToStr(Date) +  #13#10;
 end;
 
 procedure TFrmSaque.OrdenaArrays(Cedulas: Array of Integer; Quantidade: Array of Integer);
@@ -95,6 +123,16 @@ begin
     end;
 end;
 
+function TFrmSaque.RelatorioTransação: String;
+var
+  Indice: Integer;
+begin
+  for Indice in DadosTransação.Keys do
+    ResumoTransação := ResumoTransação + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10 ;
+  Result := ResumoTransação;
+
+end;
+
 function TFrmSaque.saldo(): Integer;
 var
   QuantiaTerminal, Indice: integer;
@@ -110,7 +148,7 @@ end;
 
 procedure TFrmSaque.Saque(Quantia: Integer);
 var
-  QuantiaAtual, Indice, DTcedula: integer;
+  QuantiaAtual, Indice, valor: integer;
 begin
   DadosTransação          := TDictionary<Integer, Integer>.create();
   Indice                  := 0;
@@ -119,7 +157,7 @@ begin
   if Quantia = 0 then
     begin
       ShowMessage(' Quantia Invalida para saque !');
-      PnlValor.Caption := 0;
+      PnlValor.Caption := '0';
       FrmPrincipal.AlterarTela(1);
     end
   else
@@ -132,19 +170,28 @@ begin
             ShowMessage(' Quantia Não permitida !')
           else
             begin
-              for Indice := Low(Cedula) to High(Cedula) do
+              if ContagemCedulas(Quantia) <> StrToInt(PnlValor.Caption) then
                 begin
-                  if Trunc(Quantia / cedula[Indice]) <> 0 then
-                    begin
-                      DadosTransação.Add(cedula[Indice], Trunc(Quantia / cedula[Indice]));
-                      QuantiaAtual := (QuantiaAtual + (cedula[Indice] * Trunc(Quantia / cedula[Indice])));
-                      Quantia  := Quantia mod cedula[Indice];
-                    end;
-                end;
-              if QuantiaAtual <> StrToInt(PnlValor.Caption) then
-                ShowMessage(' Quantia não permitido ! ')
+                  ShowMessage(' Quantia não permitida ! ');
+                end
               else
-                ShowMessage('Saque Realizado com sucesso !');
+                begin
+
+               //BUSCA DAS CEDULAS PARA ORDENAMENTO EM ARRAY.
+                 // FrmPrincipal.CdsNotas.IndexName := 'VALORDESC';
+                 // FrmPrincipal.cdsNotas.FindFirst;
+                  for valor in DadosTransação.Keys do
+                    begin
+                      if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) then
+                          FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
+
+                      Inc(indice);
+                      FrmPrincipal.cdsNotas.FindNext;
+                    end;
+                  FrmPrincipal.cdsNotas.FindFirst;
+                  ShowMessage(RelatorioTransação());
+                  PnlValor.Caption := '0';
+                end;
             end;
         end;
     end;
@@ -208,7 +255,7 @@ begin
    setLength(cedula, 0);
    setLength(quantidade, 0);
 
- //BUSCA DAS cedula PARA ORDENAMENTO EM ARRAY.
+ //BUSCA DAS CEDULAS PARA ORDENAMENTO EM ARRAY.
     while (FrmPrincipal.cdsNotas.Active) and (indice <> 2) do
       begin
         if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = 1)  OR
@@ -235,6 +282,7 @@ end;
 
 procedure TFrmSaque.BtnCancelarClick(Sender: TObject);
 begin
+  PnlValor.Caption := '0';
   FrmPrincipal.AlterarTela(1);
 end;
 
