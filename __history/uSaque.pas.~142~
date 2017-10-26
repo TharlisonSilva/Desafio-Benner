@@ -38,16 +38,16 @@ type
     procedure BtnBackspaceClick(Sender: TObject);
     procedure BtnCancelarClick(Sender: TObject);
     procedure BtnConfirmarClick(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
   private
-    var  //PARA ORDENAÇÃO E CALCULO DAS CEDULAS INTERNO.
+          {Declarações privadas }
+  public
+    var
+      ResumoTransação: String;
       Cedula: Array of Integer;
       Quantidade: Array of Integer;
       DadosTransação : TDictionary<Integer, Integer>;
-      ResumoTransação: String;
-    procedure Saque(Quantia: Integer);
 
-  public
+    procedure Saque(Quantia: Integer);
     procedure Tecla(Valor: integer);{ Processa a tecla pressionada }
     procedure OrdenaArrays(Cedulas: Array of Integer; Quantidade: Array of Integer); //ORDENA OS ARRAYS PARA CALCULO INTERNO.
     procedure AlimentaArrays;//ALIMENTAÇÃO DOS ARRAYS COM DADOS DO BANCO, PARA PROCESSAMENTO INTERNO.
@@ -79,16 +79,11 @@ begin
       if Trunc(Quantia / cedula[Indice]) <> 0 then
         begin
           DadosTransação.Add(cedula[Indice], Trunc(Quantia / cedula[Indice]));
-          QuantiaAtual := (QuantiaAtual + (cedula[Indice] * Trunc(Quantia / cedula[Indice])));
+          QuantiaAtual := QuantiaAtual + (cedula[Indice] * (Trunc(Quantia / cedula[Indice])));
           Quantia  := Quantia mod cedula[Indice];
         end;
     end;
   result := QuantiaAtual;
-end;
-
-procedure TFrmSaque.FormCreate(Sender: TObject);
-begin
-  ResumoTransação := #13#10+ 'Data de Saque: '+  #13#10 +DateToStr(Date) +  #13#10;
 end;
 
 procedure TFrmSaque.OrdenaArrays(Cedulas: Array of Integer; Quantidade: Array of Integer);
@@ -125,12 +120,17 @@ end;
 
 function TFrmSaque.RelatorioTransação: String;
 var
-  Indice: Integer;
+  Indice  :Integer;
+  Extrato :String;
 begin
+  Extrato := '';
   for Indice in DadosTransação.Keys do
-    ResumoTransação := ResumoTransação + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10 ;
-  Result := ResumoTransação;
-
+    begin
+      ResumoTransação := ResumoTransação + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10;
+      Extrato         := IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]);
+    end;
+  ResumoTransação   := 'Data Saque:  '+ DateToStr(Date) + #13#10 +ResumoTransação + ' > --------------' + #13#10;
+  Result := Extrato;
 end;
 
 function TFrmSaque.saldo(): Integer;
@@ -152,7 +152,6 @@ var
 begin
   DadosTransação          := TDictionary<Integer, Integer>.create();
   Indice                  := 0;
-  QuantiaAtual            := 0;
 
   if Quantia = 0 then
     begin
@@ -170,27 +169,32 @@ begin
             ShowMessage(' Quantia Não permitida !')
           else
             begin
-              if ContagemCedulas(Quantia) <> StrToInt(PnlValor.Caption) then
+              if ContagemCedulas(Quantia) <> Quantia then
                 begin
                   ShowMessage(' Quantia não permitida ! ');
                 end
               else
                 begin
-
-               //BUSCA DAS CEDULAS PARA ORDENAMENTO EM ARRAY.
-                 // FrmPrincipal.CdsNotas.IndexName := 'VALORDESC';
-                 // FrmPrincipal.cdsNotas.FindFirst;
-                  for valor in DadosTransação.Keys do
-                    begin
-                      if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) then
-                          FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
-
-                      Inc(indice);
-                      FrmPrincipal.cdsNotas.FindNext;
-                    end;
-                  FrmPrincipal.cdsNotas.FindFirst;
-                  ShowMessage(RelatorioTransação());
-                  PnlValor.Caption := '0';
+                 FrmPrincipal.cdsNotas.FindFirst;
+                 FrmPrincipal.CdsNotas.IndexName := 'VALORDESC';
+                 FrmPrincipal.cdsNotas.FindFirst;
+                 for valor in DadosTransação.Keys do
+                  begin
+                    for Indice := Low(cedula) to High(cedula) do
+                      begin
+                        if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) then
+                          begin
+                            FrmPrincipal.cdsNotas.Edit;
+                            FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
+                            FrmPrincipal.cdsNotas.Post;
+                            FrmPrincipal.cdsNotas.ApplyUpdates(-1);
+                          end;
+                        FrmPrincipal.cdsNotas.FindNext;
+                      end;
+                    FrmPrincipal.cdsNotas.FindFirst;
+                  end;
+                 ShowMessage('Data Saque: ' + DateToStr(date)+ #13#10 +RelatorioTransação());
+                 PnlValor.Caption := '0';
                 end;
             end;
         end;
