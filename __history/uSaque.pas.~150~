@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, uRelatorioSaque, Generics.Collections;
+  Dialogs, StdCtrls, ExtCtrls, uRelatorioSaque, Generics.Collections, uManutencao;
 
 type
   TFrmSaque = class(TFrame)
@@ -186,12 +186,12 @@ begin
                   begin
                     for Indice := Low(cedula) to High(cedula) do
                       begin
-                        if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) then
+                        if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) AND (valor = cedula[Indice])then
                           begin
                             FrmPrincipal.cdsNotas.Edit;
                             FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
                             FrmPrincipal.cdsNotas.Post;
-                            FrmPrincipal.cdsNotas.ApplyUpdates(-1);
+                            FrmPrincipal.cdsNotas.ApplyUpdates(0);
                           end;
                         FrmPrincipal.cdsNotas.FindNext;
                       end;

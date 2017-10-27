@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, uRelatorioSaque, Generics.Collections;
+  Dialogs, StdCtrls, ExtCtrls, uRelatorioSaque, Generics.Collections, uManutencao;
 
 type
   TFrmSaque = class(TFrame)
@@ -39,14 +39,15 @@ type
     procedure BtnCancelarClick(Sender: TObject);
     procedure BtnConfirmarClick(Sender: TObject);
   private
-    var  //PARA ORDENAÇÃO E CALCULO DAS CEDULAS INTERNO.
+          {Declarações privadas }
+  public
+    var
+      ResumoTransação: String;
       Cedula: Array of Integer;
       Quantidade: Array of Integer;
       DadosTransação : TDictionary<Integer, Integer>;
-      ResumoTransação: String;
-    procedure Saque(Quantia: Integer);
 
-  public
+    procedure Saque(Quantia: Integer);
     procedure Tecla(Valor: integer);{ Processa a tecla pressionada }
     procedure OrdenaArrays(Cedulas: Array of Integer; Quantidade: Array of Integer); //ORDENA OS ARRAYS PARA CALCULO INTERNO.
     procedure AlimentaArrays;//ALIMENTAÇÃO DOS ARRAYS COM DADOS DO BANCO, PARA PROCESSAMENTO INTERNO.
@@ -119,13 +120,17 @@ end;
 
 function TFrmSaque.RelatorioTransação: String;
 var
-  Indice: Integer;
+  Indice  :Integer;
+  Extrato :String;
 begin
+  Extrato := '';
   for Indice in DadosTransação.Keys do
-    ResumoTransação := ResumoTransação + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10;
-
-  ResumoTransação   := ResumoTransação + ' > --------------' + #13#10;
-  Result := ResumoTransação;
+    begin
+      ResumoTransação := ResumoTransação + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10;
+      Extrato         := Extrato + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10 ;
+    end;
+  ResumoTransação   := 'Data Saque:  '+ DateToStr(Date) + #13#10 +ResumoTransação + ' > --------------' + #13#10;
+  Result := Extrato;
 end;
 
 function TFrmSaque.saldo(): Integer;
@@ -144,6 +149,7 @@ end;
 procedure TFrmSaque.Saque(Quantia: Integer);
 var
   QuantiaAtual, Indice, valor: integer;
+  Alterou: Boolean;
 begin
   DadosTransação          := TDictionary<Integer, Integer>.create();
   Indice                  := 0;
@@ -161,12 +167,16 @@ begin
         begin
           OrdenaArrays(cedula,Quantidade);
           if Saldo() < Quantia then
-            ShowMessage(' Quantia Não permitida !')
+            begin
+              ShowMessage(' Quantia Não permitida !');
+              PnlValor.Caption := '0';
+            end
           else
             begin
               if ContagemCedulas(Quantia) <> Quantia then
                 begin
                   ShowMessage(' Quantia não permitida ! ');
+                  PnlValor.Caption := '0';
                 end
               else
                 begin
@@ -177,13 +187,19 @@ begin
                   begin
                     for Indice := Low(cedula) to High(cedula) do
                       begin
-                        if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) then
+                        Alterou := false;
+                        while Alterou do
                           begin
-                            FrmPrincipal.cdsNotas.Edit;
-                            FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
-                            FrmPrincipal.cdsNotas.Post;
+                            if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) AND (valor = cedula[Indice])then
+                              begin
+                                FrmPrincipal.cdsNotas.Insert;
+                                FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
+                                FrmPrincipal.cdsNotas.Post;
+                                FrmPrincipal.cdsNotas.ApplyUpdates(0);
+                                Alterou := True;
+                              end;
+                            FrmPrincipal.cdsNotas.FindNext;
                           end;
-                        FrmPrincipal.cdsNotas.FindNext;
                       end;
                     FrmPrincipal.cdsNotas.FindFirst;
                   end;
@@ -191,7 +207,9 @@ begin
                  PnlValor.Caption := '0';
                 end;
             end;
-        end;
+        end
+      else
+        ShowMessage(' Terminal em manutenção !');
     end;
 end;
 

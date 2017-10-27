@@ -53,6 +53,7 @@ procedure TFrmMenu.BtnExtratosClick(Sender: TObject);
 begin
     // Faço a busca dos ultimos saques feitos !
     FrmPrincipal.FrmRelatorioSaque.memo.lines.clear;
+    FrmPrincipal.FrmRelatorioSaque.memo.lines.add('Data Saque:  '+ DateToStr(Date) + #13#10);
     FrmPrincipal.FrmRelatorioSaque.memo.lines.add(FrmPrincipal.FrmSaque.ResumoTransação);
 
     FrmPrincipal.AlterarTela(5);
