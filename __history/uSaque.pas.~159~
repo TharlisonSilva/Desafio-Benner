@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, uRelatorioSaque, Generics.Collections;
+  Dialogs, StdCtrls, ExtCtrls, uRelatorioSaque, Generics.Collections, uManutencao;
 
 type
   TFrmSaque = class(TFrame)
@@ -129,7 +129,7 @@ begin
       ResumoTransação := ResumoTransação + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10;
       Extrato         := Extrato + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10 ;
     end;
-  ResumoTransação   := 'Data Saque:  '+ DateToStr(Date) + #13#10 +ResumoTransação + ' > --------------' + #13#10;
+  ResumoTransação   := ResumoTransação + ' > --------------' + #13#10 + #13#10;
   Result := Extrato;
 end;
 
@@ -148,10 +148,12 @@ end;
 
 procedure TFrmSaque.Saque(Quantia: Integer);
 var
-  QuantiaAtual, Indice, valor: integer;
+  QuantiaAtual, Indice, valor, contador: integer;
+  Alterou: Boolean;
 begin
   DadosTransação          := TDictionary<Integer, Integer>.create();
   Indice                  := 0;
+  contador                := 0;
 
   if Quantia = 0 then
     begin
@@ -186,14 +188,25 @@ begin
                   begin
                     for Indice := Low(cedula) to High(cedula) do
                       begin
-                        if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) AND (valor = cedula[Indice])then
+                        Alterou   := False;
+                        contador  := 0;
+                        while Not(Alterou) do
                           begin
-                            FrmPrincipal.cdsNotas.Edit;
-                            FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
-                            FrmPrincipal.cdsNotas.Post;
-                            FrmPrincipal.cdsNotas.ApplyUpdates(0);
+                            if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) AND (valor = cedula[Indice])then
+                              begin
+                                FrmPrincipal.cdsNotas.Edit;
+                                FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
+                                FrmPrincipal.cdsNotas.Post;
+                                FrmPrincipal.cdsNotas.ApplyUpdates(0);
+                                Alterou := True;
+                              end
+                            else
+                              Inc(contador);
+
+                            if (contador = 7 ) then
+                              Alterou := True;
+                            FrmPrincipal.cdsNotas.FindNext;
                           end;
-                        FrmPrincipal.cdsNotas.FindNext;
                       end;
                     FrmPrincipal.cdsNotas.FindFirst;
                   end;

@@ -54,6 +54,7 @@ type
     function saldo():Integer;//CONSULTA DE SALDO ATUAL NO TERMINAL.
     function RelatorioTransação():String;
     function ContagemCedulas(Quantia: Integer):Integer;
+
   end;
 
 implementation
@@ -67,6 +68,7 @@ begin
   Tecla(1);
 end;
 
+// FUNÇÃO DE RETORNO DO TOTAL DE CEDULAS USADAS NO SAQUE.
 function TFrmSaque.ContagemCedulas(Quantia: Integer):Integer;
 var
   QuantiaAtual, Indice: Integer;
@@ -86,6 +88,7 @@ begin
   result := QuantiaAtual;
 end;
 
+//ORDENAÇÃO EM ORDEM CRESCENTE NO FORMATO BOLHA.
 procedure TFrmSaque.OrdenaArrays(Cedulas: Array of Integer; Quantidade: Array of Integer);
 var
   Indice, auxiliar: integer;
@@ -93,7 +96,6 @@ var
 begin
   Trocou := True;
 
-  //ORDENAÇÃO EM ORDEM CRESCENTE NO FORMATO BOLHA.
   while(Trocou <> False)do
     begin
       Trocou := False;
@@ -118,6 +120,7 @@ begin
     end;
 end;
 
+// FUNÇÃO QUE ARMAZENA AS CEDULAS USADAS NO SAQUE, E GERA UM RELAROTORIO.
 function TFrmSaque.RelatorioTransação: String;
 var
   Indice  :Integer;
@@ -133,6 +136,7 @@ begin
   Result := Extrato;
 end;
 
+// FUNÇÃO QUE RETORNA O SALDO TOTAL DO TERMINAL.
 function TFrmSaque.saldo(): Integer;
 var
   QuantiaTerminal, Indice: integer;
@@ -146,6 +150,7 @@ begin
   Result := QuantiaTerminal;
 end;
 
+// PROCEDIMENTO DE SAQUE FINAL NO TERMINAL.
 procedure TFrmSaque.Saque(Quantia: Integer);
 var
   QuantiaAtual, Indice, valor, contador: integer;
@@ -184,6 +189,8 @@ begin
                  FrmPrincipal.cdsNotas.FindFirst;
                  FrmPrincipal.CdsNotas.IndexName := 'VALORDESC';
                  FrmPrincipal.cdsNotas.FindFirst;
+
+                 // ALGORITIMO DE EDIÇÃO DA QUANTIDADE DE CEDULAS NO BANCO DE DADOS DO TERMINAL.
                  for valor in DadosTransação.Keys do
                   begin
                     for Indice := Low(cedula) to High(cedula) do
@@ -210,6 +217,7 @@ begin
                       end;
                     FrmPrincipal.cdsNotas.FindFirst;
                   end;
+
                  ShowMessage('Data Saque: ' + DateToStr(date)+ #13#10 +RelatorioTransação());
                  PnlValor.Caption := '0';
                 end;

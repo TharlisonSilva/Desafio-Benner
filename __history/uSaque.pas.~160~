@@ -54,6 +54,7 @@ type
     function saldo():Integer;//CONSULTA DE SALDO ATUAL NO TERMINAL.
     function RelatorioTransação():String;
     function ContagemCedulas(Quantia: Integer):Integer;
+
   end;
 
 implementation
@@ -67,6 +68,7 @@ begin
   Tecla(1);
 end;
 
+// FUNÇÃO DE RETORNO DO TOTAL DE CEDULAS USADAS NO SAQUE.
 function TFrmSaque.ContagemCedulas(Quantia: Integer):Integer;
 var
   QuantiaAtual, Indice: Integer;
@@ -86,6 +88,10 @@ begin
   result := QuantiaAtual;
 end;
 
+// ALGORITIMO DE EDIÇÃO DA QUANTIDADE DE CEDULAS NO BANCO DE DADOS DO TERMINAL.
+
+
+//ORDENAÇÃO EM ORDEM CRESCENTE NO FORMATO BOLHA.
 procedure TFrmSaque.OrdenaArrays(Cedulas: Array of Integer; Quantidade: Array of Integer);
 var
   Indice, auxiliar: integer;
@@ -93,7 +99,6 @@ var
 begin
   Trocou := True;
 
-  //ORDENAÇÃO EM ORDEM CRESCENTE NO FORMATO BOLHA.
   while(Trocou <> False)do
     begin
       Trocou := False;
@@ -118,6 +123,7 @@ begin
     end;
 end;
 
+// FUNÇÃO QUE ARMAZENA AS CEDULAS USADAS NO SAQUE, E GERA UM RELAROTORIO.
 function TFrmSaque.RelatorioTransação: String;
 var
   Indice  :Integer;
@@ -129,10 +135,11 @@ begin
       ResumoTransação := ResumoTransação + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10;
       Extrato         := Extrato + IntToStr(Indice) + '  --> ' + IntToStr(DadosTransação[Indice]) + #13#10 ;
     end;
-  ResumoTransação   := 'Data Saque:  '+ DateToStr(Date) + #13#10 +ResumoTransação + ' > --------------' + #13#10;
+  ResumoTransação   := ResumoTransação + ' > --------------' + #13#10 + #13#10;
   Result := Extrato;
 end;
 
+// FUNÇÃO QUE RETORNA O SALDO TOTAL DO TERMINAL.
 function TFrmSaque.saldo(): Integer;
 var
   QuantiaTerminal, Indice: integer;
@@ -146,12 +153,15 @@ begin
   Result := QuantiaTerminal;
 end;
 
+// PROCEDIMENTO DE SAQUE FINAL NO TERMINAL.
 procedure TFrmSaque.Saque(Quantia: Integer);
 var
-  QuantiaAtual, Indice, valor: integer;
+  QuantiaAtual, Indice, valor, contador: integer;
+  Alterou: Boolean;
 begin
   DadosTransação          := TDictionary<Integer, Integer>.create();
   Indice                  := 0;
+  contador                := 0;
 
   if Quantia = 0 then
     begin
@@ -186,14 +196,25 @@ begin
                   begin
                     for Indice := Low(cedula) to High(cedula) do
                       begin
-                        if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) AND (valor = cedula[Indice])then
+                        Alterou   := False;
+                        contador  := 0;
+                        while Not(Alterou) do
                           begin
-                            FrmPrincipal.cdsNotas.Edit;
-                            FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
-                            FrmPrincipal.cdsNotas.Post;
-                            FrmPrincipal.cdsNotas.ApplyUpdates(0);
+                            if (FrmPrincipal.cdsNotas.FieldByName('valor').AsInteger = valor) AND (valor = cedula[Indice])then
+                              begin
+                                FrmPrincipal.cdsNotas.Edit;
+                                FrmPrincipal.cdsNotas.FieldByName('quantidade').AsInteger := (quantidade[indice] - DadosTransação[valor]);
+                                FrmPrincipal.cdsNotas.Post;
+                                FrmPrincipal.cdsNotas.ApplyUpdates(0);
+                                Alterou := True;
+                              end
+                            else
+                              Inc(contador);
+
+                            if (contador = 7 ) then
+                              Alterou := True;
+                            FrmPrincipal.cdsNotas.FindNext;
                           end;
-                        FrmPrincipal.cdsNotas.FindNext;
                       end;
                     FrmPrincipal.cdsNotas.FindFirst;
                   end;
